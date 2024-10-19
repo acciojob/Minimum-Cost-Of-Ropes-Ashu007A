@@ -1,51 +1,31 @@
 function calculateMinCost() {
-  const ropeLengthsInput = document.getElementById('rope-lengths').value;
-  const ropeLengths = ropeLengthsInput.split(',').map(length => parseInt(length.trim()));
+    // Get the input value and parse it into an array of numbers
+    const input = document.getElementById('rope-lengths').value;
+    const ropes = input.split(',').map(Number);
 
-  if (ropeLengths.length < 2) {
-    document.getElementById('result').textContent = 'Minimum cost: 0';
-    return;
-  }
-
-  // Helper function to create a min-heap
-  function createMinHeap(array) {
-    for (let i = Math.floor(array.length / 2); i >= 0; i--) {
-      minHeapify(array, i);
-    }
-  }
-
-  // Helper function to maintain min-heap property
-  function minHeapify(array, index) {
-    const left = 2 * index + 1;
-    const right = 2 * index + 2;
-    let smallest = index;
-
-    if (left < array.length && array[left] < array[smallest]) {
-      smallest = left;
+    if (ropes.some(isNaN)) {
+        document.getElementById('result').innerHTML = 'Invalid input, please enter comma-separated numbers.';
+        return;
     }
 
-    if (right < array.length && array[right] < array[smallest]) {
-      smallest = right;
+    // Min-Heap (Priority Queue) to efficiently get the smallest ropes
+    const minHeap = [...ropes].sort((a, b) => a - b);
+    let totalCost = 0;
+
+    while (minHeap.length > 1) {
+        // Get the two smallest ropes
+        const first = minHeap.shift();
+        const second = minHeap.shift();
+
+        // Connect the ropes and add the cost
+        const cost = first + second;
+        totalCost += cost;
+
+        // Add the new rope back to the heap
+        minHeap.push(cost);
+        minHeap.sort((a, b) => a - b);
     }
 
-    if (smallest !== index) {
-      [array[index], array[smallest]] = [array[smallest], array[index]];
-      minHeapify(array, smallest);
-    }
-  }
-
-  // Create a min-heap from rope lengths
-  createMinHeap(ropeLengths);
-
-  let totalCost = 0;
-  while (ropeLengths.length > 1) {
-    const first = ropeLengths.shift();
-    const second = ropeLengths.shift();
-    const cost = first + second;
-    totalCost += cost;
-    ropeLengths.unshift(cost);
-    minHeapify(ropeLengths, 0);
-  }
-
-  document.getElementById('result').textContent = `Minimum cost: ${totalCost}`;
+    // Display the result
+    document.getElementById('result').innerHTML = `Minimum cost to connect ropes: ${totalCost}`;
 }
